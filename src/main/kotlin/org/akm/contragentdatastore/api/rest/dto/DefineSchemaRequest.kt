@@ -1,4 +1,4 @@
-package org.akm.contragentdatastore.core.service.schema.dto
+package org.akm.contragentdatastore.api.rest.dto
 
 import org.akm.contragentdatastore.data.schemaindex.model.TableDefinition
 

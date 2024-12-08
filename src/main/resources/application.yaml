@@ -1,1 +1,30 @@
-spring.application.name=contragent-datastore
+spring:
+  application:
+    name: contragent-datastore
+  datasource:
+    url: jdbc:postgresql://localhost:5432/schema_manager
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+
+
+clickhouse:
+  url: jdbc:clickhouse://localhost:8123
+  username: default
+  password: ""
+  database: schema_data?compress=0
+
+minio:
+  access-key: ROV5I9vWHvB16zDlK6Q3
+  secret-key: 6w6BJhVS8fdSl0yjsIeXPBvvlrZ3xG4ji2SaeDru
+  endpoint: http:/localhost:9000
+
+server:
+  port: 8080

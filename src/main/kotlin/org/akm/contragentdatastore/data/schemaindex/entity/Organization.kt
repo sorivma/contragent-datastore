@@ -1,16 +1,18 @@
-import jakarta.persistence.*
+package org.akm.contragentdatastore.data.schemaindex.entity
+
+import com.fasterxml.jackson.databind.JsonNode
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.LocalDate
-import java.util.*
 
 @Entity
 @Table(name = "organizations")
 data class Organization(
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
-
     @Column(name = "inn", nullable = false, length = 12)
     val inn: String,
 
@@ -31,17 +33,17 @@ data class Organization(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sv_obr_yul", columnDefinition = "jsonb")
-    val svObrYul: OrganizationCreationInfo? = null,
+    val svObrYul: JsonNode? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sv_naim_yul", columnDefinition = "jsonb")
-    val svNaimYul: OrganizationNameInfo? = null,
+    val svNaimYul: JsonNode? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sv_reg_org", columnDefinition = "jsonb")
-    val svRegOrg: RegistrationAuthorityInfo? = null,
+    val svRegOrg: JsonNode? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sv_adres_yul", columnDefinition = "jsonb")
-    val svAdresYul: AddressInfo? = null
+    val svAdresYul: JsonNode? = null
 )

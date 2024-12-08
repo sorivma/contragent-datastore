@@ -1,7 +1,11 @@
-package org.akm.contragentdatastore.data.repository
+package org.akm.contragentdatastore.data.schemaindex.repository
 
-import org.akm.contragentdatastore.data.entity.SchemaEntity
+import org.akm.contragentdatastore.data.schemaindex.entity.SchemaEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 import java.util.UUID
 
-interface SchemaRepository : JpaRepository<SchemaEntity, UUID>
+@Repository
+interface SchemaRepository : JpaRepository<SchemaEntity, UUID> {
+    fun findBySchemaName(name: String): SchemaEntity?
+}

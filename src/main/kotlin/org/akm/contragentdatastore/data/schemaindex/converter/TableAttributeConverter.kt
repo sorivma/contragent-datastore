@@ -1,4 +1,4 @@
-package org.akm.contragentdatastore.data.schemaindex
+package org.akm.contragentdatastore.data.schemaindex.converter
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
