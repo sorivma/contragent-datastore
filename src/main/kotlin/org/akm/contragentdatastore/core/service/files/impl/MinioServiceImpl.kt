@@ -22,6 +22,8 @@ class MinioServiceImpl(
         return inputStream
     }
 
+
+
     override fun getObjects(bucketName: String, path: String): List<InputStream> {
         val inputStreams = mutableListOf<InputStream>()
 
@@ -49,5 +51,16 @@ class MinioServiceImpl(
         }
 
         return inputStreams
+    }
+
+    override fun listAllObjects(bucketName: String): List<String> {
+        val objects = minioClient.listObjects(
+            ListObjectsArgs.builder()
+                .bucket(bucketName)
+                .recursive(true)
+                .build()
+        )
+
+        return objects.mapNotNull { it.get().objectName() }.toList()
     }
 }

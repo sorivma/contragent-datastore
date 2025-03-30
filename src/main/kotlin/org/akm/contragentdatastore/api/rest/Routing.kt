@@ -17,6 +17,7 @@ object Routing {
             const val IMPORT_PERSONS = "/persons"
             const val IMPORT_STATUS = "/import-status"
             const val IMPORT_HISTORY = "/import-history"
+            const val LIST_FILES = "/list-files"
         }
 
         object Data {

@@ -41,25 +41,25 @@ class FileImportServiceImpl(
         return when (format) {
             FileFormat.CSV -> {
                 val status = importStatusService.createImportStatus()
-                csvImportPipeLine.executePipeline(fileName, schemaService.getDefinition(schemaName), schemaName,
+                csvImportPipeLine.executePipeline(
+                    fileName, schemaService.getDefinition(schemaName), schemaName,
                     onError = {
                         logger.error("Error in csv import: {}", it)
                         status.status = Status.FAILED
                         status.message = it
                         status.finishedAt = LocalDateTime.now()
                         importStatusService.updateImportStatus(status)
-                },
+                    },
                     onComplete = {
                         logger.info("Successfully imported: {}", fileName)
                         status.status = Status.COMPLETED
                         status.finishedAt = LocalDateTime.now()
                         importStatusService.updateImportStatus(status)
-                })
+                    })
                 status
             }
         }
     }
-
 
     override fun importOrganzations(importStatuses: ImportStatusEntity): ImportStatusEntity {
         Thread {
@@ -105,9 +105,9 @@ class FileImportServiceImpl(
         return importStatuses
     }
 
-
+    @Async
     fun handleOrganizationImport(onComplete: () -> Unit, onError: (String) -> Unit) {
-        val inputStreams = minioService.getObjects("contragent-data", "organizations/")
+        val inputStreams = minioService.getObjects("contr-agent-bucket", "organizations/")
 
         for (inputStream in inputStreams) {
             try {
@@ -124,9 +124,9 @@ class FileImportServiceImpl(
         onComplete()
     }
 
-
+    @Async
     fun handlePersonsImport(onComplete: () -> Unit, onError: (String) -> Unit) {
-        val inputStreams = minioService.getObjects("contragent-data", "persons/")
+        val inputStreams = minioService.getObjects("contr-agent-bucket", "persons/")
 
         for (inputStream in inputStreams) {
             try {
@@ -164,17 +164,17 @@ class FileImportServiceImpl(
 
             organizations.add(
                 Organization(
-                inn = organizationDto.inn,
-                kpp = organizationDto.kpp,
-                ogrn = organizationDto.ogrn,
-                kodOpf = organizationDto.opfCode,
-                sprOpf = organizationDto.opfType,
-                dataVyp = organizationDto.issuanceDate,
-                svObrYul = organizationDto.creationInfo,
-                svNaimYul = organizationDto.nameInfo,
-                svRegOrg = organizationDto.registrationAuthority,
-                svAdresYul = organizationDto.addressInfo
-            )
+                    inn = organizationDto.inn,
+                    kpp = organizationDto.kpp,
+                    ogrn = organizationDto.ogrn,
+                    kodOpf = organizationDto.opfCode,
+                    sprOpf = organizationDto.opfType,
+                    dataVyp = organizationDto.issuanceDate,
+                    svObrYul = organizationDto.creationInfo,
+                    svNaimYul = organizationDto.nameInfo,
+                    svRegOrg = organizationDto.registrationAuthority,
+                    svAdresYul = organizationDto.addressInfo
+                )
             )
         }
 

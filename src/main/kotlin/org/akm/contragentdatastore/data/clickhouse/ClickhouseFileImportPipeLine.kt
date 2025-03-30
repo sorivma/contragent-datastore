@@ -1,9 +1,11 @@
 package org.akm.contragentdatastore.data.clickhouse
 
 import org.akm.contragentdatastore.data.schemaindex.model.TableDefinition
+import org.springframework.scheduling.annotation.Async
 import java.io.InputStream
 
 abstract class ClickhouseFileImportPipeLine : FileImportPipeline {
+    @Async
     override fun executePipeline(filePath: String, schemaDefinition: TableDefinition, schemaName: String,
     onComplete: () -> Unit, onError: (error: String) -> Unit
     ) {

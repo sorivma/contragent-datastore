@@ -7,6 +7,7 @@ import org.akm.contragentdatastore.core.service.files.MinioService
 import org.akm.contragentdatastore.data.clickhouse.ClickhouseFileImportPipeLine
 import org.akm.contragentdatastore.data.schemaindex.model.TableDefinition
 import org.hibernate.query.sqm.ParsingException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
@@ -23,43 +24,75 @@ class MinioCsvImportPipeLine(
     @Qualifier("clickhouse")
     private val jdbcTemplate: JdbcTemplate,
 ) : ClickhouseFileImportPipeLine() {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     override fun readFile(filePath: String): InputStream {
-        return minioService.getObject("contragent-data", filePath)
+        return minioService.getObject("contr-agent-bucket", filePath)
     }
 
     override fun parseFile(inputStream: InputStream): List<Map<String, Any>> {
-        val parser =CSVParserBuilder().withSeparator(';').build()
+        val parser = CSVParserBuilder().withSeparator(',').build()
 
         val reader = CSVReaderBuilder(InputStreamReader(inputStream))
             .withCSVParser(parser)
             .build()
 
-
         val records = mutableListOf<Map<String, Any>>()
 
-        val headers = reader.readNext()
-        if (headers != null) {
+        val rawHeaders = reader.readNext()
+        if (rawHeaders != null) {
+            val headers = rawHeaders.map { it.trim() }
+            log.info("Parsed headers: $headers")
+
             var row: Array<String>?
             while (reader.readNext().also { row = it } != null) {
-                val rowMap = headers.zip(row!!).toMap()
+                if (row!!.size != headers.size) {
+                    log.warn("Row size ${row!!.size} does not match headers size ${headers.size}: ${row!!.toList()}")
+                    continue // Пропускаем такую строку
+                }
+
+                val rowMap = headers.zip(row!!.map { it.trim() }).toMap()
                 records.add(rowMap)
             }
+        } else {
+            log.warn("No headers found in CSV.")
         }
+
         return records
     }
 
     override fun transformData(parsedData: List<Map<String, Any>>, schema: TableDefinition): List<Map<String, Any>> {
-        return parsedData.map { row ->
-            val rowWithTimestamp = schema.columns.associate { column ->
-                column.name to (row[column.dataSetName ?: column.name]
-                    ?: throw ParsingException("Could not find column named ${column.dataSetName ?: column.name}"))
+        if (parsedData.isEmpty()) {
+            log.warn("Parsed data is empty!")
+            return emptyList()
+        }
+
+        val firstRow = parsedData.first()
+        val availableKeys = firstRow.keys
+        log.info("Keys available in CSV rows: $availableKeys")
+
+        val transformed = parsedData.mapIndexed { index, row ->
+            val rowWithMappedColumns = schema.columns.associate { column ->
+                val key = column.dataSetName?.trim() ?: column.name.trim()
+                log.debug("Row $index: Looking for key '$key'")
+
+                val value = row[key]
+                if (value == null) {
+                    log.error("Row $index: Missing column '$key'. Available keys: ${row.keys}")
+                    throw ParsingException("Could not find column named '$key'")
+                }
+
+                column.name to value
             }.toMutableMap()
 
-            rowWithTimestamp["import_timestamp"] =
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            rowWithMappedColumns["import_timestamp"] = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
-            rowWithTimestamp
+            rowWithMappedColumns
         }
+
+        log.info("Successfully transformed ${transformed.size} rows")
+        return transformed
     }
 
     @Async

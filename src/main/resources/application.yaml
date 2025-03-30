@@ -1,30 +1,28 @@
 spring:
   application:
-    name: contragent-datastore
-  datasource:
-    url: jdbc:postgresql://localhost:5432/schema_manager
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
+    name: ${SPRING_APPLICATION_NAME:contragent-datastore}
 
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/schema_manager}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+
+  jpa:
+    database-platform: ${JPA_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate.format_sql: ${FORMAT_SQL:true}
 
 clickhouse:
-  url: jdbc:clickhouse://localhost:8123
-  username: default
-  password: ""
-  database: schema_data?compress=0
+  url: ${CLICKHOUSE_URL:jdbc:clickhouse://localhost:8123}
+  username: ${CLICKHOUSE_USERNAME:default}
+  password: ${CLICKHOUSE_PASSWORD:}
+  database: ${CLICKHOUSE_DATABASE:schema_data?compress=0}
 
 minio:
-  access-key: ROV5I9vWHvB16zDlK6Q3
-  secret-key: 6w6BJhVS8fdSl0yjsIeXPBvvlrZ3xG4ji2SaeDru
-  endpoint: http:/localhost:9000
-
-server:
-  port: 8080
+  access-key: ${MINIO_ACCESS_KEY:ROV5I9vWHvB16zDlK6Q3}
+  secret-key: ${MINIO_SECRET_KEY:6w6BJhVS8fdSl0yjsIeXPBvvlrZ3xG4ji2SaeDru}
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
